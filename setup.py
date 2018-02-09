@@ -4,10 +4,6 @@
 from setuptools import setup
 
 
-with open('requirements.txt') as f:
-    install_requires = f.read().split('\n')
-
-
 setup(
     name='pytest-pgtap',
     version='0.0.1dev',
@@ -18,9 +14,11 @@ setup(
     url='https://github.com/lmergner/pytest-pgtap',
 
     packages=['pytest_pgtap'],
-    install_requires=install_requires,
-    tests_require=[
+    install_requires=[
         'pytest',
+        'psycopg2'
+    ],
+    tests_require=[
         'pytest-cov',
     ],
     setup_requires=[

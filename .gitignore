@@ -75,3 +75,5 @@ shell.py
 node_modules
 tests/perf.json
 .cache/
+.eggs/
+.pytest_cache/
