@@ -77,3 +77,4 @@ tests/perf.json
 .cache/
 .eggs/
 .pytest_cache/
+.vscode/
