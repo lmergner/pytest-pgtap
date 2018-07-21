@@ -3,7 +3,6 @@
 
 from setuptools import setup
 
-# TODO: Change name to py-pgtap and make the pytest plugin an optional install
 setup(
     name='pytest-pgtap',
     version='0.0.1dev',
@@ -16,7 +15,6 @@ setup(
     packages=['pytest_pgtap'],
     install_requires=[
         'pytest>=3.6.3',
-        'tap.py',
         'sqlparse',
     ],
     extras_require={

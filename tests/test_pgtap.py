@@ -97,35 +97,6 @@ ok 2 - whatever.test_passing
     assert result.splitlines() == expected.splitlines()
 
 
-def test_Loader():
-    tap_output = """
-1..2
-not ok 1 - contacts should have a name
-# Failed test 1: "contacts should have a name"
-ok 2 - simple pass
-# Looks like you failed 1 test of 2
-""".strip('\n')
-    expected = """
-F.
-======================================================================
-FAIL: <file=stream>
-- contacts should have a name
-----------------------------------------------------------------------
-
-----------------------------------------------------------------------
-Ran 2 tests in 0.000s
-
-FAILED (failures=1)
-""".strip('\n')
-
-    suite = pgtap.Loader().load_suite_from_text('unittests', tap_output)
-    assert len(suite._tests) == 2
-    runner = unittest.TextTestRunner(verbosity=1, stream=sys.stderr)
-    result = runner.run(suite)
-    assert result.wasSuccessful() == False
-    # TODO: test is incomplete... how do we test the unittest test suite?
-
-
 @pytest.mark.parametrize(
     "schema, pattern, expected", [
         (None, None, 'SELECT * FROM runtests();'),

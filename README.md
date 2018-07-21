@@ -3,6 +3,8 @@ NOTE:  This is non-functioning alpha software.
 pytest-pgtap is `pytest_plugin` that allows pytest to discover, run, and
 aggregate pgTap PostgreSQL tests.
 
+v0.0.1dev
+
 ## Requirements
 
 - pytest test suite
@@ -60,3 +62,5 @@ Distributed under the terms of the [MIT][] license, pytest-pgtap is free and ope
 [tappy]: http://tappy.readthedocs.io/en/latest/
 [posgresql]: https://www.postgresql.org/
 [sqlalchemy]: http://www.sqlalchemy.org/
+
+https://medium.com/engineering-on-the-incline/unit-testing-postgres-with-pgtap-af09ec42795

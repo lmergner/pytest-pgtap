@@ -11,8 +11,6 @@ import shlex
 import subprocess
 from typing import Generator, List, Dict
 
-from tap.loader import Loader
-# TODO: Do we really need sqlparse?
 import sqlparse
 
 logger = logging.getLogger('pytest-pgtap')

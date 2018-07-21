@@ -8,12 +8,21 @@ import pytest
 from click.testing import CliRunner
 from pytest_pgtap.cli import cli, log_level_name
 
+SQL_TESTS = """
+-- Should return two successful tests
+BEGIN;
+    SELECT plan(2);
+    SELECT fail('simple fail');
+    SELECT pass('simple pass');
+    SELECT * FROM finish();
+ROLLBACK;
+"""
+
 
 @pytest.fixture
 def runner(tmpdir, database):
     sub = tmpdir.mkdir('tests')
-    tf = sub.join('test_passing.sql')
-    tf.write('passing')
+    sub.copy('tests/sql-tests', 'tests')
     return partial(CliRunner().invoke, cli, ['pgtap', '--uri', database, sub.dirpath])
 
 
@@ -31,4 +40,4 @@ def test_log_level(levelname, num):
 def test_cli_exit_code(runner, subprocess):
     result = runner()
     mock = subprocess()
-    # TODO: What am i testing here?
+    mock.called_wth
