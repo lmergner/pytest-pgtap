@@ -3,7 +3,7 @@ NOTE:  This is non-functioning alpha software.
 pytest-pgtap is `pytest_plugin` that allows pytest to discover, run, and
 aggregate pgTap PostgreSQL tests.
 
-v0.0.1dev
+v0.1.0-alpha
 
 ## Requirements
 

@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='pytest-pgtap',
-    version='0.0.1dev',
+    version='0.1.0-alpha',
     description='Pytest plugin for running pgTAP tests',
     long_description=open('README.md').read(),
     author='Luke Mergner',
