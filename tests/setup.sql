@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS whatever.contact (
     created_on date DEFAULT now()
 );
 
+-- A Setup Fixture for pgTap runtests();
 CREATE OR REPLACE FUNCTION whatever.setup() RETURNS SETOF TEXT AS $$
     SELECT text('Setup...');
 $$ LANGUAGE SQL;
@@ -22,7 +23,7 @@ CREATE OR REPLACE FUNCTION whatever.test_failing() RETURNS SETOF TEXT AS $$
     SELECT fail('simple fail');
 $$ LANGUAGE SQL;
 
-
+-- A TearDown Fixture for pgTap runtests();
 CREATE OR REPLACE FUNCTION whatever.teardown() RETURNS SETOF TEXT AS $$
     SELECT text('Teardown...');
 $$ LANGUAGE SQL;

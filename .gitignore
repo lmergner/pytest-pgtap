@@ -78,3 +78,6 @@ tests/perf.json
 .eggs/
 .pytest_cache/
 .vscode/
+.mypy_cache
+tappy
+docker-pgtap
