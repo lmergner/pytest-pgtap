@@ -11,8 +11,9 @@ import shlex
 import subprocess
 from typing import Generator, List, Dict
 
-import sqlparse
 from tap.loader import Loader
+# TODO: Do we really need sqlparse?
+import sqlparse
 
 logger = logging.getLogger('pytest-pgtap')
 
@@ -28,18 +29,28 @@ class PsqlError(Exception):
     pass
 
 
-class pgTapError(Exception):
-    msg = 'There was an exception'
-
-
 class Executor(abc.ABC):
 
     @abc.abstractmethod
-    def run(self):
+    def run(self, test: str):
+        """ Run a query against a database """
         pass
 
 
-class Runner(object):
+class Shell(Executor):
+
+    @abc.abstractproperty
+    def command(self) -> str:
+        """ Return a string representation of a database shell command """
+        pass
+
+    @property
+    def command_tokens(self) -> List[str]:
+        """ Return a shlex.split list of the database command """
+        return shlex.split(self.command)
+
+
+class Psql(Shell):
     """ run pgTap test through psql """
 
     default_psql_command: str = """
@@ -52,7 +63,7 @@ class Runner(object):
         --set ON_ERROR_STOP=1
     """
 
-    default_subprocess_kwargs: Dict[str, bool] = dict(
+    default_psql_kwargs: Dict[str, bool] = dict(
         text=True,
         capture_output=True,
     )
@@ -61,18 +72,13 @@ class Runner(object):
         self.psql_opts = make_url(psql_uri)
 
     @property
-    def psql_command(self) -> str:
+    def command(self) -> str:
         """ Return the psql command """
         # Strip off the leading tabs
         cmd = ' '.join([line.strip()
                         for line in self.default_psql_command.splitlines()]).strip()
         cmd += ' --dbname %s' % self.psql_opts
         return cmd
-
-    @property
-    def psql_command_tokens(self) -> List[str]:
-        """ Returns the psql comand as the result of a shlex.split() """
-        return shlex.split(self.psql_command)
 
     def runtests(self, schema: str = None, pattern: str = None) -> str:
         """ run pgTap runtests()
@@ -95,12 +101,12 @@ class Runner(object):
     def run(self, test: str) -> str:
         """ run an test where the test is a string """
         logger.debug('Runner.run() input\n\n%s\n%s\n',
-                     test, self.psql_command)
+                     test, self.command)
         try:
             result = subprocess.run(
-                self.psql_command_tokens,
+                self.command_tokens,
                 input=test,
-                **self.default_subprocess_kwargs,
+                **self.default_psql_kwargs,
             )
             result.check_returncode()
 
@@ -118,6 +124,9 @@ class Runner(object):
         return self.run(wrap_plan(*sqlparse.split(test)))
 
 
+Runner = Psql
+
+
 def find_test_files(
     path: str,
     pattern: str = 'test_*.sql',
@@ -127,7 +136,6 @@ def find_test_files(
     for root, dirs, files in os.walk(path):
         for fname in files:
             if match_file_name(fname, pattern):
-                logger.debug(f'Found a match: {fname}')
                 yield os.path.join(root, fname)
 
 

@@ -2,8 +2,6 @@
 
 import pytest
 
-# xxx: are we actually using this?
-# xxx: Can we declare this here instead of conftest.py?
 pytest_plugins = ['pytester']
 
 SQL_TESTS = """
@@ -19,31 +17,34 @@ ROLLBACK;
 PYTHON_TESTS = """
 def test_pgtap_fixture(pgtap):
     assert pgtap(
-        "select has_column('contacts', 'name', 'contacts should have a name');")
+        "select has_column('whatever.contacts', 'name', 'contacts should have a name');")
 """
 
 INI = """
 [pytest]
-addopts = --pgtap-uri {0}
+addopts = -p no:mock -p no:cov
+log_cli = True
+log_level = DEBUG
+"""
+
+HEADER = """
+pgTap Connection: postgres://postgres@192.168.1.68/pytest-pgtap*
+pgTap Schema: None*
 """
 
 
-@pytest.fixture
-def sql(testdir, database):
-    testdir.plugins.append('pgtap')
+def test_isolated_filesystem(testdir, database):
+    testdir.plugins.append('pytest_pgtap')
+    testdir.makefile('.sql', test_sql_file=SQL_TESTS)
+    testdir.makepyfile(test_pgtap_fixture=PYTHON_TESTS)
     testdir.makeini(INI.format(database))
-    return testdir
+    result = testdir.runpytest('-v', '--pgtap-uri', database)
+    print(result.stdout.str())
+    assert result.ret == 1
+    result.stdout.fnmatch_lines_random(HEADER)
+    result.stdout.fnmatch_lines_random([
+        'plugins: pgtap-*',
+        'collecting ... collected 2 items*'
+    ])
 
-
-@pytest.mark.xfail
-def test_sql_test(sql):
-    sql.makefile('.sql', test_sql_file=SQL_TESTS)
-    result = sql.runpytest()
-    result.assert_outcomes(failed=1)
-
-
-@pytest.mark.xfail
-def test_python_fixture(sql):
-    sql.makepyfile(test_pgtap_fixture=PYTHON_TESTS)
-    result = sql.runpytest()
-    result.assert_outcomes(passed=1)
+    result.assert_outcomes(failed=1, passed=1)

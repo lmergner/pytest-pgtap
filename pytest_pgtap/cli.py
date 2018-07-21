@@ -33,31 +33,37 @@ def log_level_name(lvl, lower_bound=2):
 
 
 @click.command()
-@click.argument('test_path', type=click.Path(exists=True), default='tests/')
+@click.argument(
+    'path_or_file',
+    type=click.Path(exists=True),
+    default='tests/'
+)
 @click.option('--uri', default={}, help='Database uri')
 @click.option(
     '-schema', default=None,
     help='the schema used for pgtap\'s runtests() function. Setting '
     'the schema tells pgtap to run runtests().'
 )
-@click.option(
-    '-f', '--file', 'filename', type=click.File('r'),
-    help='Run a file instead of searching the path'
-)
 @click.option('-x', '--exclude', multiple=True,)
 @click.option('--verbose', '-v', count=True, default=0)
-def cli(test_path, schema, filename, verbose, exclude, uri):
+def cli(path_or_file, schema, filename, verbose, exclude, uri):
     """ Find all the pgTap test files in a directory and run them against a
     database, where PATH is the test directory. PATH is optional and defaults
     to tests/.
 
     """
-    logging.basicConfig(format='%(levelname)s: %(message)s',  # pragma: no cover
-                        level=log_level_name(verbose))
-
-    runner = Runner(uri)
+    # TODO: add testing for file handling
     # TODO: connect exclude to find_test_files
-    files = find_test_files(test_path)
+    # TODO: Add / verify tests for excluded files
+    logging.basicConfig(format='%(levelname)s: %(message)s',
+                        level=log_level_name(verbose))
+    runner = Runner(uri)
+    if path_or_file.is_file():
+        files = [path_or_file]
+    elif path_or_file.is_dir():
+        files = find_test_files(path_or_file)
+    else:
+        raise click.BadArgumentUsage('Expected a file or directory')
     for fn in files:
         with open(fn) as f:
             try:

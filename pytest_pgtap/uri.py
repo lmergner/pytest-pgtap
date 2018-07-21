@@ -1,12 +1,12 @@
 # Copyright (c) 2018 Luke Mergner and contributors
+# Note:  much of this module is from SqlAlchemy and Michael Bayer
+# https://bitbucket.org/zzzeek/sqlalchemy/src/1ed3803654c122f91d5910adf4078627464b0692/lib/sqlalchemy/engine/url.py
 """
     Database URI parsing, 90% borrowed from SQLAlchemy lib/sqlalchemy/engine/url.py
 """
 import collections
 import re
 from urllib.parse import unquote_plus, parse_qsl, unquote
-
-# https://bitbucket.org/zzzeek/sqlalchemy/src/1ed3803654c122f91d5910adf4078627464b0692/lib/sqlalchemy/engine/url.py?at=master&fileviewer=file-view-default
 
 
 def make_url(name_or_url):

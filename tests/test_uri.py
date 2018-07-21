@@ -1,8 +1,9 @@
-import pytest
-
-from pytest_pgtap.uri import _parse_string_to_map
-
+# Copyright (c) 2018 Luke Mergner and contributors
+# Note:  much of this test is from SqlAlchemy and Michael Bayer
 # https://bitbucket.org/zzzeek/sqlalchemy/src/1ed3803654c122f91d5910adf4078627464b0692/test/engine/test_parseconnect.py?at=master&fileviewer=file-view-default
+
+import pytest
+from pytest_pgtap.uri import _parse_string_to_map
 
 
 @pytest.mark.parametrize(

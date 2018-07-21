@@ -7,15 +7,18 @@ import pytest  # type: ignore
 import os
 import logging
 
-from .pgtap import match_file_name, pgTapError, Runner
+from .pgtap import match_file_name, Runner
 
 logger = logging.getLogger('pytest-pgtap')
 
 
-# TODO:  Write tests for runtests in public schema
+class TestError(Exception):
+    """ Represent a pgTap test failure """
+    pass
 
 
 def pytest_addoption(parser):
+    """ pytest hook:  add options to the pytest cli """
     group = parser.getgroup('pgtap', 'pgtap test runner')
     group.addoption('--pgtap-uri', help='database uri')
     group.addoption(
@@ -28,8 +31,8 @@ def pytest_addoption(parser):
 
 
 def pytest_report_header(config):
-    '''
-    return a string to be displayed as header info for terminal reporting.
+    '''pytest hook: return a string to be displayed 
+                    as header info for terminal reporting.
     '''
     return '\n'.join([
         'pgTap Connection: {0}'.format(config.getoption('pgtap_uri')),
@@ -38,16 +41,18 @@ def pytest_report_header(config):
     ])
 
 
-def pytest_collect_file(path, parent):
-    if match_file_name(path, parent.config.getoption('pgtap_pattern')):
+def pytest_collect_file(path: str, parent) -> pytest.Collector:
+    """ pytest hook: collect files for testing """
+    if match_file_name(os.path.basename(path), parent.config.getoption('pgtap_pattern')):
         logger.debug('Matched %s', path)
-        return SQLFile(fspath=path, parent=parent)
+        return SQLItem(name=path, parent=parent)
 
 
-def pytest_collection_modifyitems(session, config, items):
+# def pytest_collection_modifyitems(session, config, items):
+    # """ pytest hook:  modify collected tests before execution """
     # Catch flag to run in-database tests
     # cf. http://pgtap.org/documentation.html#runtests
-    schema = config.getoption('pgtap_schema')
+    # schema = config.getoption('pgtap_schema')
     # if schema:
     #     logger.debug('Appending the runtests query to collector items')
     #     items.append(SQLItem(
@@ -57,24 +62,33 @@ def pytest_collection_modifyitems(session, config, items):
     #         teststr='select * from runtests(\'%s\'::name)' % schema))
 
 
-class SQLItem(pytest.Item):
+class SQLItem(pytest.Item, pytest.File):
 
-    def __init__(self, name, parent, teststr):
+    def __init__(
+        self,
+        name: str,  # the path of the test file
+        parent,     # a pytest.Item or similar
+    ):
         super().__init__(name, parent)
-        # self.filename = filename
+        with open(name) as f:
+            self.test = f.read()
+        self.runner = Runner(parent.config.getoption('pgtap_uri'))
 
     def runtest(self):
-        raise pgTapError
+        result: str = self.runner.run(self.test)
+        logger.debug('plugin pytest.Item.runtest %s', result)
+        if 'not ok' in result:
+            raise TestError(result)
 
     def reportinfo(self):
-        return ""
+        return self.test, None, ' '.join(['pgTap', self.name])
 
     def repr_failure(self, excinfo):
         """
         Unwrap mypy errors so we get a clean error message without the
         full exception repr.
         """
-        if excinfo.errisinstance(pgTapError):
+        if excinfo.errisinstance(TestError):
             return excinfo.value.args[0]
         return super().repr_failure(excinfo)
 
@@ -86,12 +100,13 @@ def pgtap(request):
     ..code: Python
         def test_db(pgtap):
             assert pgtap(
-                "select has_column('contacts', 'name', 'contacts should have a name');")
+                "select has_column('whatever.contacts', 'name', 'contacts should have a name');")
 
     Consult the pgtap documentation.
     """
     runner = Runner(request.config.getoption('pgtap_uri'))
 
+    # TODO:  Should return True or False, not a string
     def executor(teststr):
-        return runner.run(teststr)
+        return runner.run_with_plan(teststr)
     yield executor

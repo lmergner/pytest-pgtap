@@ -1,6 +1,5 @@
 # Copyright (c) 2018 Luke Mergner and contributors
 
-from subprocess import CompletedProcess
 import sys
 import pytest  # type: ignore
 import unittest
@@ -48,7 +47,7 @@ def assert_args_in(m, *mock_args, **mock_kwargs):
 def test_Runner_args(args, result):
     """ Runner should build psql cmd without any empty flags """
     runner = pgtap.Runner(args)
-    assert runner.psql_command_tokens == result
+    assert runner.command_tokens == result
 
 
 def test_Runner_query(database):
@@ -157,6 +156,38 @@ def test_wrap_plan(query, expected):
     assert pgtap.wrap_plan(query) == expected
 
 
+def test_Runner_run_with_plan(subprocess):
+    test = 'SELECT pass(\'simple pass\');'
+    expected = """
+BEGIN;
+SELECT plan(1);
+SELECT pass('simple pass');
+SELECT * FROM finish();
+ROLLBACK;
+""".strip()
+    mock = subprocess()
+    runner = pgtap.Runner()
+    runner.run_with_plan(test)
+    assert_args_in(mock, input=expected)
+
+#
+# Pytest Collection tests
+#
+
+
+@pytest.mark.parametrize(
+    'fname, pattern, is_match', [
+        ('test_sql_file.sql', 'test_*.sql', True),
+        ('test_pyfile.py', 'test_*.sql', False),
+        ('not_a_test.txt', 'test_*.sql', False),
+        ('any_sql_file.sql', '*.sql', True),
+        ('__pycache__', '*', False),  # should be excluded by default
+    ]
+)
+def test_match_file_name(fname, pattern, is_match):
+    assert pgtap.match_file_name(fname, pattern) == is_match
+
+
 @pytest.mark.parametrize(
     'folder, filelist, expected', [
         ('.', ['test_file.sql', 'not-test.txt'], ['./test_file.sql']),
@@ -173,18 +204,3 @@ def test_load_files(mocker, folder, filelist, expected):
         (folder, [], filelist)
     ]
     assert list(pgtap.find_test_files(folder)) == expected
-
-
-def test_Runner_run_with_plan(subprocess):
-    test = 'SELECT pass(\'simple pass\');'
-    expected = """
-BEGIN;
-SELECT plan(1);
-SELECT pass('simple pass');
-SELECT * FROM finish();
-ROLLBACK;
-""".strip()
-    mock = subprocess()
-    runner = pgtap.Runner()
-    runner.run_with_plan(test)
-    assert_args_in(mock, input=expected)
