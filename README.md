@@ -1,35 +1,62 @@
-pytest-pgtap is `pytest_plugin`_ that allows pytest to discover, run, and
+NOTE:  This is non-functioning alpha software.
+
+pytest-pgtap is `pytest_plugin` that allows pytest to discover, run, and
 aggregate pgTap PostgreSQL tests.
 
-Requirements
-------------
+## Requirements
 
 - pytest test suite
 - psql installed on the machine running pytest-pgtap
 - PostgreSQL with pgTap installed somewhere
 
-Installation
-------------
+## Installation
 
-    pip install pytest-pgtap
+```
+$ pip install https://github.com/lmergner/pytest-pgtap
+```
 
 Optionally install the cli runner:
 
-    pip install pytest-pgtap[cli]
+```
+$ pip install https://github.com/lmergner/pytest-pgtap[cli]
+```
 
 
+## Usage
+
+The cli:
+```
+$ pgtap --uri [DATABASE_URL] tests/
+```
+
+With pytest:
+```
+$ pytest --pgtap-uri [DATABASE_URL]
+```
+
+Using the experimental pytest fixture:
+
+```
+
+def test_with_a_fixture(pgtap):
+    pgtap('SELECT pass('this test passes;')
+```
+
+The idea is that the plugin will calculate the plan and wrap the test in the
+pgtap boilerplate before invoking psql.  With [SqlAlchemy][] it might even be possible
+to access the functions by name, i.e.  `func.pass`.
 
 
-License
--------
+## License
 
-Copyright Luke Mergner 2018.
+Copyright (c) Luke Mergner 2018.
 
-Distributed under the terms of the `MIT`_ license, pytest is free and open source software.
+Distributed under the terms of the [MIT][] license, pytest-pgtap is free and open source software.
 
-.. _`MIT`: https://github.com/pytest-dev/pytest/blob/master/LICENSE
-.. _`pytest-pgtap`: https://www.github.com/lmergner/pytest-pgtap
-.. _pytest`: https://pytest.org/
-.. _pgtap`: https://pgtap.org
-.. _tappy`: http://tappy.readthedocs.io/en/latest/
-.. _posgresql`: https://www.postgresql.org/
+[MIT]: https://github.com/pytest-dev/pytest/blob/master/LICENSE
+[pytest-pgtap]: https://www.github.com/lmergner/pytest-pgtap
+[pytest]: https://pytest.org/
+[pgtap]: https://pgtap.org
+[tappy]: http://tappy.readthedocs.io/en/latest/
+[posgresql]: https://www.postgresql.org/
+[sqlalchemy]: http://www.sqlalchemy.org/
