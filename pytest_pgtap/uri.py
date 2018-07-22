@@ -8,9 +8,10 @@
 import collections
 import re
 from urllib.parse import unquote_plus, parse_qsl, unquote
+from typing import Union
 
 
-def make_url(name_or_url):
+def make_url(name_or_url: str):
     """Given a string or unicode instance, produce a new URL instance.
 
     The given string is parsed according to the RFC 1738 spec.  If an
@@ -55,14 +56,22 @@ class URL(object):
 
     """
 
-    def __init__(self, drivername, username=None, password=None,
-                 host=None, port=None, database=None, query=None):
+    def __init__(
+            self,
+            drivername: str,
+            username: str = None,
+            password: str = None,
+            host: str = None,
+            port: str = None,
+            database: str = None,
+            query: Union[dict, None] = None
+    ) -> None:
         self.drivername = drivername
         self.username = username
         self.password_original = password
         self.host = host
         if port is not None:
-            self.port = int(port)
+            self.port: Union[int, None] = int(port)
         else:
             self.port = None
         self.database = database
@@ -70,13 +79,14 @@ class URL(object):
 
     @property
     def password(self):
+        """ password proxy """
         if self.password_original is None:
             return None
-        else:
-            return str(self.password_original)
+        return str(self.password_original)
 
     @password.setter
     def password(self, password):
+        """ password proxy setter """
         self.password_original = password
 
     def __str__(self):
@@ -89,7 +99,7 @@ class URL(object):
         return hash(str(self))
 
     def translate_connect_args(self):
-        r"""Translate url attributes into a dictionary of connection arguments.
+        """Translate url attributes into a dictionary of connection arguments.
 
         Returns attributes of this url (`host`, `database`, `username`,
         `password`, `port`) as a plain dictionary.  The attribute names are
@@ -104,33 +114,34 @@ class URL(object):
                 translated[name] = getattr(self, name)
         return translated
 
-    def __to_string__(self, hide_password=True):
-        s = self.drivername + "://"
+    def __to_string__(self, hide_password=True) -> str:
+        """ return self as a valid database uri """
+        fragment = self.drivername + "://"
         if self.username is not None:
-            s += _rfc_1738_quote(self.username)
+            fragment += _rfc_1738_quote(self.username)
             if self.password is not None:
-                s += ':' + ('***' if hide_password
-                            else _rfc_1738_quote(self.password))
-            s += "@"
+                fragment += ':' + ('***' if hide_password
+                                   else _rfc_1738_quote(self.password))
+            fragment += "@"
         if self.host is not None:
             if ':' in self.host:
-                s += "[%s]" % self.host
+                fragment += "[%s]" % self.host
             else:
-                s += self.host
+                fragment += self.host
         if self.port is not None:
-            s += ':' + str(self.port)
+            fragment += ':' + str(self.port)
         if self.database is not None:
-            s += '/' + self.database
+            fragment += '/' + self.database
         if self.query:
             keys = list(self.query)
             keys.sort()
-            s += '?' + "&".join(
+            fragment += '?' + "&".join(
                 "%s=%s" % (
                     k,
                     element
                 ) for k in keys for element in _to_list(self.query[k])
             )
-        return s
+        return fragment
 
 
 def _parse_string_to_map(name):
@@ -149,9 +160,9 @@ def _parse_string_to_map(name):
             )?
             (?:/(?P<database>.*))?
         ''', re.X)
-    m = pattern.match(name)
-    if m is not None:
-        components = m.groupdict()
+    match = pattern.match(name)
+    if match is not None:
+        components = match.groupdict()
 
         if components['database'] is not None:
             tokens = components['database'].split('?', 2)
@@ -184,23 +195,24 @@ def _parse_string_to_map(name):
         return URL(drivername, **components)
     else:
         raise Exception(
-            "Could not parse rfc1738 URL from string '%s', the format should match 'dialect+driver://username:password@host:port/database'" % name)
+            "Could not parse rfc1738 URL from string '%s', the format "
+            "should match 'dialect+driver://username:password@host:port/database'" % name)
 
 
 def _rfc_1738_quote(text):
     return re.sub(r'[:@/]', lambda m: "%%%X" % ord(m.group(0)), text)
 
 
-def _to_list(x, default=None):
-    if x is None:
+def _to_list(listlike: Union[str, list], default=None) -> list:
+    if listlike is None:
         return default
-    if not isinstance(x, collections.abc.Iterable) or \
-            isinstance(x, (str, bytes)):
-        return [x]
-    elif isinstance(x, list):
-        return x
+    if not isinstance(listlike, collections.abc.Iterable) or \
+            isinstance(listlike, (str, bytes)):
+        return [listlike]
+    elif isinstance(listlike, list):
+        return listlike
     else:
-        return list(x)
+        return list(listlike)
 
 
 _parse_rfc1738_args = _parse_string_to_map  # pragma: no cover
