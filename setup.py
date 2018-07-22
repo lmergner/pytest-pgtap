@@ -18,7 +18,6 @@ setup(
         'sqlparse',
     ],
     extras_require={
-        'cli': ['click'],
     },
     tests_require=[
         'pytest-cov',
@@ -31,9 +30,6 @@ setup(
         # TODO: make the pytest plugin optional
         'pytest11': [
             'pgtap = pytest_pgtap.plugin',
-        ],
-        'console_scripts': [
-            'pgtap = pytest_pgtap.cli:cli [cli]'
         ],
     },
     include_package_data=False,
