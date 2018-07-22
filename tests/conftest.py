@@ -47,6 +47,8 @@ def run_container():
 
 @pytest.fixture(scope='session')
 def database():
+    if os.environ.get('CI'):
+        return os.environ.get('DATABASE_URL')
     return 'postgres://postgres@192.168.1.68/pytest-pgtap'
 
 

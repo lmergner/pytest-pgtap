@@ -5,6 +5,8 @@ aggregate pgTap PostgreSQL tests.
 
 v0.1.0-alpha
 
+[![Build Status](https://travis-ci.org/lmergner/pytest-pgtap.svg?branch=master)](https://travis-ci.org/lmergner/pytest-pgtap)
+
 ## Requirements
 
 - pytest test suite
