@@ -3,9 +3,9 @@
 """
 Define the command line interface for pgtap.
 """
+import os
 import logging
 import click
-from tap.loader import Loader
 from .pgtap import Runner, find_test_files
 
 
@@ -47,7 +47,7 @@ def log_level_name(lvl, lower_bound=2):
 )
 @click.option('-x', '--exclude', multiple=True,)
 @click.option('--verbose', '-v', count=True, default=0)
-def cli(path_or_file, schema, filename, verbose, exclude, uri):
+def cli(path_or_file, schema, verbose, exclude, uri):
     """ Find all the pgTap test files in a directory and run them against a
     database, where PATH is the test directory. PATH is optional and defaults
     to tests/.
@@ -59,9 +59,9 @@ def cli(path_or_file, schema, filename, verbose, exclude, uri):
     logging.basicConfig(format='%(levelname)s: %(message)s',
                         level=log_level_name(verbose))
     runner = Runner(uri)
-    if path_or_file.is_file():
+    if os.path.isfile(path_or_file):
         files = [path_or_file]
-    elif path_or_file.is_dir():
+    elif os.path.isdir(path_or_file):
         files = find_test_files(path_or_file)
     else:
         raise click.BadArgumentUsage('Expected a file or directory')
@@ -69,10 +69,7 @@ def cli(path_or_file, schema, filename, verbose, exclude, uri):
         with open(fn) as f:
             try:
                 tap_result = runner.run(f.read())
+                print(tap_result)
             except Exception as e:
-                raise click.ClickException(e)
-        l = Loader()
-        suite = l.load_suite_from_text(fn, tap_result)
-        import unittest
-        runner = unittest.TextTestRunner(verbosity=3)
-        result = runner.run(suite)
+                logger.error(e)
+                pass
