@@ -1,3 +1,4 @@
+-- Copyright (c) 2018 Luke Mergner and contributors
 -- Should return raise a bad plan warning
 BEGIN;
     SELECT plan(1);

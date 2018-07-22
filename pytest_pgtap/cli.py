@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2018 Luke Mergner and contributors
 """
 Define the command line interface for pgtap.

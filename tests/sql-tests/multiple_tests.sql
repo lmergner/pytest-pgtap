@@ -1,3 +1,4 @@
+-- Copyright (c) 2018 Luke Mergner and contributors
 -- Should return two successful tests and one failing test
 BEGIN;
     SELECT plan(3);

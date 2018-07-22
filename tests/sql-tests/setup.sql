@@ -1,3 +1,4 @@
+-- Copyright (c) 2018 Luke Mergner and contributors
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap;
 CREATE SCHEMA IF NOT EXISTS whatever;

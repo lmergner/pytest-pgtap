@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2018 Luke Mergner and contributors
 
-import sys
 import pytest  # type: ignore
 import unittest
 from pytest_pgtap import pgtap
