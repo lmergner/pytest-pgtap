@@ -13,14 +13,9 @@ import subprocess
 from typing import Generator, List, Dict
 
 import sqlparse
+from .uri import make_url
 
 logger = logging.getLogger('pytest-pgtap')
-
-try:
-    from sqlalchemy.engine import make_url
-    logger.warn('Using sqlalchemy\'s url parsing library.')
-except ImportError:
-    from .uri import make_url
 
 
 class PsqlError(Exception):
@@ -132,7 +127,7 @@ def find_test_files(
 ) -> Generator[str, None, None]:
     """ Yield list of matching file paths """
     # TODO: use glob.glob?
-    for root, dirs, files in os.walk(path):
+    for root, _, files in os.walk(path):
         for fname in files:
             if match_file_name(fname, pattern):
                 yield os.path.join(root, fname)
