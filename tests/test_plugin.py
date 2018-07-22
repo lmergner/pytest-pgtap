@@ -28,7 +28,7 @@ def test_pgtap_fixture(pgtap):
 
 INI = """
 [pytest]
-addopts = -p no:mock -p no:cov
+addopts = 
 log_cli = True
 log_level = DEBUG
 """
@@ -40,7 +40,8 @@ def result(testdir, database):
     testdir.makefile('.sql', test_sql_file=SQL_TESTS)
     testdir.makepyfile(test_pgtap_fixture=PYTHON_TESTS)
     testdir.makeini(INI.format(database))
-    result = testdir.runpytest('-v', '--pgtap-uri', database)
+    result = testdir.runpytest(
+        '-v', '--pgtap-uri', database)
     return result
 
 
@@ -51,7 +52,7 @@ def test_pytest_plugin_returncode(result):
 def test_pytest_plugin_stdout_has(result):
     expected = HEADER.splitlines()
     expected.extend([
-        'plugins: pgtap-*',
+        'plugins: * pgtap-*',
         'collecting ... collected 2 items*'
     ])
     result.stdout.fnmatch_lines_random(expected)
