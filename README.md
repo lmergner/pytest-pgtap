@@ -64,5 +64,4 @@ Distributed under the terms of the [MIT][] license, pytest-pgtap is free and ope
 [tappy]: http://tappy.readthedocs.io/en/latest/
 [posgresql]: https://www.postgresql.org/
 [sqlalchemy]: http://www.sqlalchemy.org/
-
-https://medium.com/engineering-on-the-incline/unit-testing-postgres-with-pgtap-af09ec42795
+[howto]: https://medium.com/engineering-on-the-incline/unit-testing-postgres-with-pgtap-af09ec42795
