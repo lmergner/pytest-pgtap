@@ -21,7 +21,7 @@ class TestError(Exception):
 def pytest_addoption(parser):
     """ pytest hook:  add options to the pytest cli """
     group = parser.getgroup('pgtap', 'pgtap test runner')
-    group.addoption('--pgtap-uri', help='database uri')
+    group.addoption('--pgtap-uri', help='database uri', default=os.environ.get('DATABASE_URL'))
     group.addoption(
         '--pgtap-schema', default=None,
         help='Schema in which to find xUnit tests; '
@@ -48,6 +48,14 @@ def pytest_collect_file(path: str, parent) -> pytest.Collector:
         logger.debug('Matched %s', path)
         return SQLItem(name=path, parent=parent)
 
+
+def pytest_configure(config):
+    uri = config.getoption('pgtap_uri')
+    psql = Runner(uri)
+    psql.run('CREATE EXTENSION IF NOT EXISTS pgtap;')
+    logger.debug('Created the pgtap extension!')
+
+    
 
 # def pytest_collection_modifyitems(session, config, items):
     # """ pytest hook:  modify collected tests before execution """
@@ -101,7 +109,8 @@ def pgtap(request):
     ..code: Python
         def test_db(pgtap):
             assert pgtap(
-                "select has_column('whatever.contacts', 'name', 'contacts should have a name');")
+                "select has_column('whatever.contacts', 'name', 'contacts should have a name');"
+            )
 
     Consult the pgtap documentation.
     """

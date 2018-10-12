@@ -60,6 +60,6 @@ def subprocess(mocker):
         mock = mocker.patch(
             'subprocess.run', return_value=CompletedProcess(None, returncode=0))
         mock.returncode.return_value = value
-        mock.stdout = ''
+        mock.stdout = stdout
         return mock
     return with_return_value

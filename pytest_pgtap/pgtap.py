@@ -111,9 +111,7 @@ class Psql(Shell):
             return result.stdout
 
     def run_with_plan(self, test: str) -> str:
-        """ run an sql test and automatically generate the pgtap test scaffolding
-
-        """
+        """ run an sql test and automatically generate the pgtap test scaffolding """
         # xxx: do we really need sqlparse, even if it lets us properly count one-line tests
         return self.run(wrap_plan(*sqlparse.split(test)))
 
