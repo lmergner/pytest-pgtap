@@ -9,7 +9,7 @@ pytest-pgtap is [pytest plugin][] that allows pytest to discover, run, and aggre
 pytest-pgtap is **not** on pypi so please install from the github repo.
 
 ```
-$ pip install -U git+https://github.com/lmergner/pytest-pgtap
+$ pip install -U git+https://github.com/lmergner/pytest-pgtap.git
 ```
 
 ## Rationale
