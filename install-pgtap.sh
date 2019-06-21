@@ -12,8 +12,8 @@ fi
 
 git clone git://github.com/theory/pgtap.git ${working}
 cd ${working}
-git checkout tags/${version} 
-make 
+git checkout tags/${version}
+make
 make installcheck
 make install
 cd $PWD
