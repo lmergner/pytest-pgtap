@@ -21,9 +21,9 @@ def make_url(name_or_url: str):
     if isinstance(name_or_url, (str, bytes)):
         return _parse_rfc1738_args(name_or_url)
     elif isinstance(name_or_url, dict):
-        return URL('postgres', **name_or_url)
+        return URL("postgres", **name_or_url)
     else:
-        return URL('postgres')
+        return URL("postgres")
 
 
 class URL(object):
@@ -57,14 +57,14 @@ class URL(object):
     """
 
     def __init__(
-            self,
-            drivername: str,
-            username: str = None,
-            password: str = None,
-            host: str = None,
-            port: str = None,
-            database: str = None,
-            query: Union[dict, None] = None
+        self,
+        drivername: str,
+        username: str = None,
+        password: str = None,
+        host: str = None,
+        port: str = None,
+        database: str = None,
+        query: Union[dict, None] = None,
     ) -> None:
         self.drivername = drivername
         self.username = username
@@ -108,7 +108,7 @@ class URL(object):
         """
 
         translated = {}
-        attribute_names = ['host', 'database', 'username', 'password', 'port']
+        attribute_names = ["host", "database", "username", "password", "port"]
         for name in attribute_names:
             if getattr(self, name, False):
                 translated[name] = getattr(self, name)
@@ -120,32 +120,33 @@ class URL(object):
         if self.username is not None:
             fragment += _rfc_1738_quote(self.username)
             if self.password is not None:
-                fragment += ':' + ('***' if hide_password
-                                   else _rfc_1738_quote(self.password))
+                fragment += ":" + (
+                    "***" if hide_password else _rfc_1738_quote(self.password)
+                )
             fragment += "@"
         if self.host is not None:
-            if ':' in self.host:
+            if ":" in self.host:
                 fragment += "[%s]" % self.host
             else:
                 fragment += self.host
         if self.port is not None:
-            fragment += ':' + str(self.port)
+            fragment += ":" + str(self.port)
         if self.database is not None:
-            fragment += '/' + self.database
+            fragment += "/" + self.database
         if self.query:
             keys = list(self.query)
             keys.sort()
-            fragment += '?' + "&".join(
-                "%s=%s" % (
-                    k,
-                    element
-                ) for k in keys for element in _to_list(self.query[k])
+            fragment += "?" + "&".join(
+                "%s=%s" % (k, element)
+                for k in keys
+                for element in _to_list(self.query[k])
             )
         return fragment
 
 
 def _parse_string_to_map(name):
-    pattern = re.compile(r'''
+    pattern = re.compile(
+        r"""
         (?P<drivername>[\w\+]+)://
         (?:
             (?P<username>[^:/]*)
@@ -159,14 +160,16 @@ def _parse_string_to_map(name):
             (?::(?P<port>[^/]*))?
             )?
             (?:/(?P<database>.*))?
-        ''', re.X)
+        """,
+        re.X,
+    )
     match = pattern.match(name)
     if match is not None:
         components = match.groupdict()
 
-        if components['database'] is not None:
-            tokens = components['database'].split('?', 2)
-            components['database'] = tokens[0]
+        if components["database"] is not None:
+            tokens = components["database"].split("?", 2)
+            components["database"] = tokens[0]
             if len(tokens) > 1:
                 query = {}
                 # note: parse.qsl in sqla
@@ -180,34 +183,37 @@ def _parse_string_to_map(name):
                 query = None
         else:
             query = None
-        components['query'] = query
+        components["query"] = query
 
-        if components['username'] is not None:
-            components['username'] = unquote(components['username'])
-        if components['password'] is not None:
-            components['password'] = unquote_plus(components['password'])
+        if components["username"] is not None:
+            components["username"] = unquote(components["username"])
+        if components["password"] is not None:
+            components["password"] = unquote_plus(components["password"])
 
-        ipv4host = components.pop('ipv4host')
-        ipv6host = components.pop('ipv6host')
-        components['host'] = ipv4host or ipv6host
+        ipv4host = components.pop("ipv4host")
+        ipv6host = components.pop("ipv6host")
+        components["host"] = ipv4host or ipv6host
 
-        drivername = components.pop('drivername')
+        drivername = components.pop("drivername")
         return URL(drivername, **components)
     else:
         raise Exception(
             "Could not parse rfc1738 URL from string '%s', the format "
-            "should match 'dialect+driver://username:password@host:port/database'" % name)
+            "should match 'dialect+driver://username:password@host:port/database'"
+            % name
+        )
 
 
 def _rfc_1738_quote(text):
-    return re.sub(r'[:@/]', lambda m: "%%%X" % ord(m.group(0)), text)
+    return re.sub(r"[:@/]", lambda m: "%%%X" % ord(m.group(0)), text)
 
 
 def _to_list(listlike: Union[str, list], default=None) -> list:
     if listlike is None:
         return default
-    if not isinstance(listlike, collections.abc.Iterable) or \
-            isinstance(listlike, (str, bytes)):
+    if not isinstance(listlike, collections.abc.Iterable) or isinstance(
+        listlike, (str, bytes)
+    ):
         return [listlike]
     elif isinstance(listlike, list):
         return listlike

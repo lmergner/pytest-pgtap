@@ -3,7 +3,7 @@
 
 import pytest
 
-pytest_plugins = ['pytester']
+pytest_plugins = ["pytester"]
 
 HEADER = """
 pgTap Connection: postgres://postgres@192.168.1.68/pytest-pgtap*
@@ -36,12 +36,11 @@ log_level = DEBUG
 
 @pytest.fixture
 def result(testdir, database):
-    testdir.plugins.append('pytest_pgtap')
-    testdir.makefile('.sql', test_sql_file=SQL_TESTS)
+    testdir.plugins.append("pytest_pgtap")
+    testdir.makefile(".sql", test_sql_file=SQL_TESTS)
     testdir.makepyfile(test_pgtap_fixture=PYTHON_TESTS)
     testdir.makeini(INI.format(database))
-    result = testdir.runpytest(
-        '-v', '--pgtap-uri', database)
+    result = testdir.runpytest("-v", "--pgtap-uri", database)
     return result
 
 
@@ -51,10 +50,7 @@ def test_pytest_plugin_returncode(result):
 
 def test_pytest_plugin_stdout_has(result):
     expected = HEADER.splitlines()
-    expected.extend([
-        'plugins: * pgtap-*',
-        'collecting ... collected 2 items*'
-    ])
+    expected.extend(["plugins: * pgtap-*", "collecting ... collected 2 items*"])
     result.stdout.fnmatch_lines_random(expected)
 
 
