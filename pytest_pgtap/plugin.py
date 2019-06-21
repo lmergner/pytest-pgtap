@@ -21,7 +21,9 @@ class TestError(Exception):
 def pytest_addoption(parser):
     """ pytest hook:  add options to the pytest cli """
     group = parser.getgroup('pgtap', 'pgtap test runner')
-    group.addoption('--pgtap-uri', help='database uri', default=os.environ.get('DATABASE_URL'))
+    group.addoption('--pgtap-uri',
+        help='database uri, defaults to DATABASE_URL env',
+        default=os.environ.get('DATABASE_URL'))
     group.addoption(
         '--pgtap-schema', default=None,
         help='Schema in which to find xUnit tests; '
@@ -32,7 +34,7 @@ def pytest_addoption(parser):
 
 
 def pytest_report_header(config):
-    '''pytest hook: return a string to be displayed 
+    '''pytest hook: return a string to be displayed
                     as header info for terminal reporting.
     '''
     return '\n'.join([
@@ -49,13 +51,13 @@ def pytest_collect_file(path: str, parent) -> pytest.Collector:
         return SQLItem(name=path, parent=parent)
 
 
-def pytest_configure(config):
-    uri = config.getoption('pgtap_uri')
-    psql = Runner(uri)
-    psql.run('CREATE EXTENSION IF NOT EXISTS pgtap;')
-    logger.debug('Created the pgtap extension!')
+@pytest.fixture(scope="session", autouse=True)
+def _install_pgtap_extension(request):
+        psql = Runner(request.config.option.pgtap_uri)
+        logger.debug('Creating the pgtap extension before tests...')
+        psql.run('CREATE EXTENSION IF NOT EXISTS pgtap;')
+        yield
 
-    
 
 # def pytest_collection_modifyitems(session, config, items):
     # """ pytest hook:  modify collected tests before execution """
