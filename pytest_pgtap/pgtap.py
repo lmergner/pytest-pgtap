@@ -10,9 +10,10 @@ import logging
 import os
 import shlex
 import subprocess
-from typing import Generator, List, Dict
+from typing import Dict, Generator, List
 
 import sqlparse
+
 from .uri import make_url
 
 logger = logging.getLogger("pytest-pgtap")

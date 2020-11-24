@@ -7,8 +7,8 @@
 """
 import collections
 import re
-from urllib.parse import unquote_plus, parse_qsl, unquote
 from typing import Union
+from urllib.parse import parse_qsl, unquote, unquote_plus
 
 
 def make_url(name_or_url: str):

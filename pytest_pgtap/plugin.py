@@ -4,11 +4,12 @@
     pgTAP plugin for pytest
 """
 
-import pytest  # type: ignore
-import os
 import logging
+import os
 
-from .pgtap import match_file_name, Runner
+import pytest  # type: ignore
+
+from .pgtap import Runner, match_file_name
 
 logger = logging.getLogger("pytest-pgtap")
 
