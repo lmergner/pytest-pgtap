@@ -81,3 +81,4 @@ tests/perf.json
 .mypy_cache
 tappy
 docker-pgtap
+.python-version
