@@ -1,0 +1,73 @@
+# TODO: cache dependencies (see link)
+#       https://docs.github.com/en/enterprise-server@2.22/actions/learn-github-actions/managing-complex-workflows#caching-dependencies
+
+name: pytest-pgtap
+on: [push]
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+    container:
+      image: python
+
+    strategy:
+      matrix:
+        python-version: [3.8] # [3.7, 3.8, 3.9]
+        postgres-version: [13] # [11, 12, 13]
+        pgtap-version: [master] # [v1.1.0, v1.0.0, v0.99.0, v0.98.0, master]
+
+    services:
+      postgres:
+        image: "lmergner/pgtap:${{ matrix.postgres-version }}-${{ matrix.pgtap-version }}"
+
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pytest-pgtap
+          POSTGRES_USER: pytest-pgtap
+
+        options: >-
+          --health-start-period 20s
+          --health-interval 20s
+          --health-timeout 10s
+          --health-retries 10
+
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install linting reqs
+        run: pip install -U flake8 isort black
+
+      - name: Lint with flake8
+        run: flake8 .
+
+      - name: Lint with isort
+        run: isort --check pytest_pgtap tests
+
+      - name: Lint with black
+        run: black --check .
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python requirements
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          # Assumes that the test requirements will be installed by setup.py
+          python setup.py install
+
+      - name: Test with pytest
+        run: |
+          pytest
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
