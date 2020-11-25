@@ -28,6 +28,7 @@ def pytest_addoption(parser):
         help="database uri, defaults to DATABASE_URL env",
         default=os.environ.get("DATABASE_URL"),
     )
+
     group.addoption(
         "--pgtap-schema",
         default=None,
@@ -41,9 +42,7 @@ def pytest_addoption(parser):
 
 
 def pytest_report_header(config):
-    """pytest hook: return a string to be displayed
-                    as header info for terminal reporting.
-    """
+    """ pytest hook: return a string to be displayed as header info for terminal reporting """
     return "\n".join(
         [
             "pgTap Connection: {0}".format(config.getoption("pgtap_uri")),
