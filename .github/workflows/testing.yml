@@ -1,11 +1,37 @@
 # TODO: cache dependencies (see link)
 #       https://docs.github.com/en/enterprise-server@2.22/actions/learn-github-actions/managing-complex-workflows#caching-dependencies
 
-name: pytest-pgtap
+name: Lint and Test pytest-pgtap master push
 on: [push]
 
 jobs:
-  lint_and_test:
+  linting:
+    name: Lint Python Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout the code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Use Python
+        uses: actions/setup-python@v2
+
+      - name: Install dependencies
+        run: |
+          python -m install flake8 isort black
+
+      - name: Run isort
+        run: isort --check pytest_pgtap setup.py  tests
+
+      - name: Run flake8
+        run: flake8 pytest_pgtap setup.py tests
+
+      - name: Runb black
+        run: black --check pytest_pgtap setup.py tests
+
+  integration_tests:
     runs-on: ubuntu-latest
     container:
       image: python
@@ -27,32 +53,15 @@ jobs:
 
         options: >-
           --health-start-period 20s
-          --health-interval 20s
-          --health-timeout 10s
-          --health-retries 10
+          --health-interval 30s
+          --health-timeout 5s
+          --health-retries 5
 
         ports:
           - 5432:5432
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: install linting reqs
-        run: pip install -U flake8 isort black
-
-      - name: Lint with flake8
-        run: flake8 .
-
-      - name: Lint with isort
-        run: isort --check pytest_pgtap tests
-
-      - name: Lint with black
-        run: black --check .
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
