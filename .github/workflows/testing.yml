@@ -74,8 +74,12 @@ jobs:
           # Assumes that the test requirements will be installed by setup.py
           python setup.py install
 
-      - name: Test with pytest
+      - name: Install psql
         run: |
-          pytest
+          apt-get update
+          apt-get install -y postgresql-client
+
+      - name: Test with pytest
+        run: pytest
         env:
-          DATABASE_URL: postgresql://pytest-pgtap:postgres@localhost:${{ job.services.postgres.ports[5432] }}/pytest-pgtap
+          DATABASE_URL: "postgresql://pytest-pgtap:postgres@localhost:${{ job.services.postgres.ports[5432] }}/pytest-pgtap"

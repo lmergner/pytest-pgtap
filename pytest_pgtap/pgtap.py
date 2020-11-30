@@ -73,7 +73,7 @@ class Psql(Shell):
         return cmd
 
     def runtests(self, schema: str = None, pattern: str = None) -> str:
-        """ run pgTap runtests()
+        """run pgTap runtests()
 
         runs all the tests defined as functions in the
         database.
@@ -99,15 +99,21 @@ class Psql(Shell):
             )
             result.check_returncode()
 
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
             logger.error("psql subprocess error: %s" % result.stderr)
-            raise
-        else:
-            return result.stdout
+            raise e
+
+        # XXX subprocess raises FileNotFoundError when psql is not installed
+        except subprocess.FileNotFoundError as e:
+            logger.error("Please install psql!")
+            raise e
+
+        return result.stdout
 
     def run_with_plan(self, test: str) -> str:
         """ run an sql test and automatically generate the pgtap test scaffolding """
-        # xxx: do we really need sqlparse, even if it lets us properly count one-line tests
+        # xxx: do we really need sqlparse, even if it lets us properly
+        #      count one-line tests
         return self.run(wrap_plan(*sqlparse.split(test)))
 
 
