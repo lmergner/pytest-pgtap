@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m install flake8 isort black
+          python -m pip install flake8 isort black
 
       - name: Run isort
         run: isort --check pytest_pgtap setup.py  tests
@@ -28,7 +28,7 @@ jobs:
       - name: Run flake8
         run: flake8 pytest_pgtap setup.py tests
 
-      - name: Runb black
+      - name: Run black
         run: black --check pytest_pgtap setup.py tests
 
   integration_tests:
@@ -78,5 +78,4 @@ jobs:
         run: |
           pytest
         env:
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+          DATABASE_URL: postgresql://pytest-pgtap:postgres@localhost:${{ job.services.postgres.ports[5432] }}/pytest-pgtap
